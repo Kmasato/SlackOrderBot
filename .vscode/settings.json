@@ -1,0 +1,5 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.pythonPath": "/Users/masato/.pyenv/versions/anaconda3-5.3.1/bin/python"
+}
