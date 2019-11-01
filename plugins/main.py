@@ -8,10 +8,14 @@ def order(message, arg1):
     orderdata = str(message.body['text'])
     if(' ' in orderdata):
         orderdata = orderdata.split(' ')
-        print(len(orderdata))
         #orderデータが3つより多い場合フォーマットが異なるのでエラーを返す
         if(3 <= len(orderdata)):
             InputFormatError(message)
+        else:
+            orderdata[0] = orderdata[0].replace("<","")
+            orderdata[0] = orderdata[0].replace(">","")
+            result = OrderFormat(orderdata[0],orderdata[1])
+            message.reply(result)
 
     else:
         orderdata = orderdata.replace("<","")
@@ -20,10 +24,10 @@ def order(message, arg1):
         message.reply(result)
 
 def OrderFormat(url,num):
-    maker,title,price = GetInfomation(url)
+    maker,name,price = GetInfomation(url)
     if(maker != -1):
         formatTex = "・メーカ名:"+maker+"\n"
-        formatTex = formatTex + "・製品名:" + title + "\n"
+        formatTex = formatTex + "・製品名:" + name + "\n"
         formatTex = formatTex + "・単価:￥" + "{:,}".format(price)+ "\n"
         formatTex = formatTex + "・個数:" + num + "\n"
         formatTex = formatTex + "・合計価格:￥" + "{:,}".format(price*int(num)) + "\n"
@@ -46,14 +50,16 @@ def OrderFormat(url,num):
 def GetInfomation(url):
     if("amazon.co.jp" in url):
         scraper = ws.AmazonScrape(url)
+    elif("monotaro.com" in url):
+        scraper = ws.MonotaroScrape(url)
     else:
         return -1,-1,-1
 
-    maker = scraper.GetMaker()
-    title = scraper.GetTitle()
+    maker = scraper.GetBrand()
+    name = scraper.GetName()
     price = scraper.GetPrice()
 
-    return maker,title,price
+    return maker,name,price
 
 def InputFormatError(message):
     message.reply("以下のフォーマットで送信してください\n 1. :amazon: or :monotarou:のURLのみ \n 2. :amazon: or :monotarou:のURL (スペース) 発注数")
