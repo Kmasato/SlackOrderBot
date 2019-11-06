@@ -33,12 +33,18 @@ class AmazonScrape():
 class  MonotaroScrape():
     def __init__ (self, _url):
         #例外処理
-
-        self.browser = webdriver.PhantomJS("/Users/masato/node_modules/phantomjs/lib/phantom/bin/phantomjs")#ブラウザを操作するオブジェクトを生成
+        #self.browser = webdriver.PhantomJS("/Users/masato/node_modules/phantomjs/lib/phantom/bin/phantomjs")#ブラウザを操作するオブジェクトを生成
+        options = webdriver.chrome.options.Options()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        self.browser = webdriver.Chrome("/Users/masato/Desktop/chromedriver",chrome_options=options)
+        self.browser.implicitly_wait(3)
+        #self.browser = webdriver.Chrome("/Users/masato/Desktop/chromedriver")
         self.browser.get(_url)
 
         self.html = self.browser.page_source
-        self.soup = BeautifulSoup(self.html, features="lxml")
+        #self.soup = BeautifulSoup(self.html, features="lxml")
+        self.soup = BeautifulSoup(self.html, "html.parser")
         
 
     def GetBrand(self):
@@ -49,11 +55,13 @@ class  MonotaroScrape():
 
     def GetName(self):
         name = self.soup.find("span", class_="item")
-        name = name.get_text()
+        print(name)
+        #name = name.get_text()
         return name
 
     def GetPrice(self):
-        item_info = self.soup.find("div",class_="itd_base_info")
+        #item_info = self.soup.find("dl", class_="itd_info_dl")
+        item_info = self.soup.select("#itd_base_info")
         print(item_info)
         #for item in item_info:
         #    print(item.text)
@@ -64,6 +72,5 @@ class  MonotaroScrape():
         price = "1"
         return int(price)
 
-monotaro = MonotaroScrape("https://www.monotaro.com/p/3260/6375/")
-time.sleep(2)
-print(monotaro.GetName())
+monotaro = MonotaroScrape("https://www.monotaro.com/p/8971/0942/")
+print(monotaro.GetBrand())
