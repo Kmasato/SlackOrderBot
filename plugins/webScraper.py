@@ -4,6 +4,9 @@ import requests
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 class AmazonScrape():
 
@@ -32,45 +35,46 @@ class AmazonScrape():
 
 class  MonotaroScrape():
     def __init__ (self, _url):
-        #例外処理
-        #self.browser = webdriver.PhantomJS("/Users/masato/node_modules/phantomjs/lib/phantom/bin/phantomjs")#ブラウザを操作するオブジェクトを生成
         options = webdriver.chrome.options.Options()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
+        #options.add_argument('--headless') #ヘッドレスだと動かない
+
         self.browser = webdriver.Chrome("/Users/masato/Desktop/chromedriver",chrome_options=options)
-        self.browser.implicitly_wait(3)
         #self.browser = webdriver.Chrome("/Users/masato/Desktop/chromedriver")
         self.browser.get(_url)
+        self.browser.implicitly_wait(1)
 
         self.html = self.browser.page_source
-        #self.soup = BeautifulSoup(self.html, features="lxml")
         self.soup = BeautifulSoup(self.html, "html.parser")
-        
 
+    def quit(self):
+        self.browser.quit()
+        
     def GetBrand(self):
         brand = self.soup.find("span", class_="itd_brand")
-        print(brand)
+        #print(brand)
         brand = brand.get_text().replace('\n','')
         return brand
 
     def GetName(self):
         name = self.soup.find("span", class_="item")
-        print(name)
-        #name = name.get_text()
+        #print(name)
+        name = name.get_text()
         return name
 
     def GetPrice(self):
-        #item_info = self.soup.find("dl", class_="itd_info_dl")
-        item_info = self.soup.select("#itd_base_info")
-        print(item_info)
-        #for item in item_info:
-        #    print(item.text)
-        #item_info = item_info.find_all("dd")
-        #price = item_info[-1].get_text().replace("\n","")
-        #price = price.replace("￥","") #￥先頭のマークを消す
-        #price = price.replace(",","")
-        price = "1"
-        return int(price)
+        item_info = self.soup.find("dl", class_="itd_info_dl")
 
-monotaro = MonotaroScrape("https://www.monotaro.com/p/8971/0942/")
-print(monotaro.GetBrand())
+        item_info = item_info.find_all("dd")
+        price = item_info[len(item_info)-1].get_text().replace("\n","")
+
+        price = price.replace("￥","") #￥先頭のマークを消す
+        price = price.replace(",","") #カンマ消す
+        return int(price)
+    
+    def GetProductNumber(self):
+        item_info = self.soup.find("dl", class_="itd_info_dl")
+        item_info = item_info.find_all("dd")
+        productNum = item_info[0].get_text().replace("\n","")
+
+        return productNum
+
